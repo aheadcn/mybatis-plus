@@ -40,74 +40,82 @@ public class CodeGeneratorTest {
      */
     boolean serviceClassNameStartWithI = true;
 
+    String tablePrefix = "";
+    String moduleName = "system";
+
     @Test
     public void generateCode() {
-        String packageName = "com.baomidou.springboot";
-        enableTableFieldAnnotation = false;
-        tableIdType = null;
-        generateByTables(packageName + ".noannoidtype", "user");
-        enableTableFieldAnnotation = true;
-        tableIdType = null;
-        generateByTables(packageName + ".noidtype", "user");
+        String packageName = "com.talkwed";
         enableTableFieldAnnotation = false;
         tableIdType = IdType.INPUT;
-        generateByTables(packageName + ".noanno", "user");
-        enableTableFieldAnnotation = true;
-        tableIdType = IdType.INPUT;
-        generateByTables(packageName + ".both", "user");
-
-        fieldPrefix = new String[]{"test"};
-        enableTableFieldAnnotation = false;
-        tableIdType = null;
-        generateByTables(packageName + ".noannoidtypewithprefix", "user");
-        enableTableFieldAnnotation = true;
-        tableIdType = null;
-        generateByTables(packageName + ".noidtypewithprefix", "user");
-        enableTableFieldAnnotation = false;
-        tableIdType = IdType.INPUT;
-        generateByTables(packageName + ".noannowithprefix", "user");
-        enableTableFieldAnnotation = true;
-        tableIdType = IdType.INPUT;
-        generateByTables(packageName + ".withannoidtypeprefix", "user");
-
-        serviceClassNameStartWithI = false;
-        generateByTables(packageName, "user");
+        tablePrefix = "t_sys_";
+        moduleName =  "system";
+        generateByTables(packageName + ".merchant", "t_sys_user");
     }
 
     private void generateByTables(String packageName, String... tableNames) {
         GlobalConfig config = new GlobalConfig();
-        String dbUrl = "jdbc:mysql://localhost:3306/mybatis-plus";
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/talkwed_merchant?characterEncoding=utf8&serverTimezone=UTC";
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setDbType(DbType.MYSQL)
             .setUrl(dbUrl)
             .setUsername("root")
-            .setPassword("")
+            .setPassword("123456")
             .setDriverName("com.mysql.jdbc.Driver");
         StrategyConfig strategyConfig = new StrategyConfig();
-        strategyConfig
-            .setCapitalMode(true)
-            .setEntityLombokModel(false)
-            .setDbColumnUnderline(true)
-            .setNaming(NamingStrategy.underline_to_camel)
-            .entityTableFieldAnnotationEnable(enableTableFieldAnnotation)
-            .fieldPrefix(fieldPrefix)//test_id -> id, test_type -> type
-            .setInclude(tableNames);//修改替换成你需要的表名，多个表名传数组
+//        strategyConfig
+//            .setCapitalMode(true)
+//            .setEntityLombokModel(false)
+//            .setDbColumnUnderline(true)
+//            .setNaming(NamingStrategy.underline_to_camel)
+//            .entityTableFieldAnnotationEnable(enableTableFieldAnnotation)
+//            .fieldPrefix(fieldPrefix)//test_id -> id, test_type -> type
+//            .setInclude(tableNames);//修改替换成你需要的表名，多个表名传数组
+
+        // 此处可以修改为您的表前缀
+        strategyConfig.setTablePrefix(tablePrefix);
+        //限制只生某个表的业务
+        strategyConfig.setInclude(tableNames);
+        strategyConfig.setNaming(NamingStrategy.underline_to_camel);
+
         config.setActiveRecord(false)
             .setIdType(tableIdType)
-            .setAuthor("K神带你飞")
-            .setOutputDir("d:\\codeGen")
-            .setFileOverride(true);
+            .setAuthor("chenjie")
+            .setOutputDir("d:\\tmp\\codeGen")
+            .setControllerOutputDir("d:\\tmp\\codeGen\\controller")
+            .setInterfaceOutputDir("d:\\tmp\\codeGen\\interface")
+            .setFileOverride(true)
+            .setEnableCache(false)
+            .setBaseColumnList(true)
+            .setBaseResultMap(true)
+            .setOpen(true);
+
+
+
         if (!serviceClassNameStartWithI) {
             config.setServiceName("%sService");
         }
+
+        PackageConfig packageConfig = new PackageConfig();
+        packageConfig.setParent(packageName);
+//        packageConfig.setController("controller");
+//        packageConfig.setEntity("entity");
+
+        String path = "modular." + moduleName;
+
+        packageConfig.setEntity(path + ".entity");
+        packageConfig.setMapper(path + ".dao");
+        packageConfig.setXml(path + ".dao.mapping");
+        packageConfig.setService(path + ".service");
+        packageConfig.setServiceImpl(path + ".service.impl");
+        packageConfig.setController(path + ".controller");
+
+
         new AutoGenerator().setGlobalConfig(config)
             .setDataSource(dataSourceConfig)
             .setStrategy(strategyConfig)
             .setPackageInfo(
-                new PackageConfig()
-                    .setParent(packageName)
-                    .setController("controller")
-                    .setEntity("entity")
+                packageConfig
             ).execute();
     }
 }

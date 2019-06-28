@@ -15,32 +15,21 @@
  */
 package com.baomidou.mybatisplus.generator.config.builder;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.baomidou.mybatisplus.generator.InjectionConfig;
-import com.baomidou.mybatisplus.generator.config.ConstVal;
-import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
-import com.baomidou.mybatisplus.generator.config.GlobalConfig;
-import com.baomidou.mybatisplus.generator.config.IDbQuery;
-import com.baomidou.mybatisplus.generator.config.PackageConfig;
-import com.baomidou.mybatisplus.generator.config.StrategyConfig;
-import com.baomidou.mybatisplus.generator.config.TemplateConfig;
+import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableFill;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.config.rules.DbType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * <p>
@@ -129,9 +118,9 @@ public class ConfigBuilder {
         }
         // 包配置
         if (null == packageConfig) {
-            handlerPackage(this.template, this.globalConfig.getOutputDir(), new PackageConfig());
+            handlerPackage(this.template, this.globalConfig.getOutputDir(), this.globalConfig.getInterfaceOutputDir(),  this.globalConfig.getControllerOutputDir(), new PackageConfig());
         } else {
-            handlerPackage(this.template, this.globalConfig.getOutputDir(), packageConfig);
+            handlerPackage(this.template, this.globalConfig.getOutputDir(), this.globalConfig.getInterfaceOutputDir(),  this.globalConfig.getControllerOutputDir(), packageConfig);
         }
         this.dataSourceConfig = dataSourceConfig;
         handlerDataSource(dataSourceConfig);
@@ -232,16 +221,7 @@ public class ConfigBuilder {
 
     // ****************************** 曝露方法 END**********************************
 
-    /**
-     * <p>
-     * 处理包配置
-     * </p>
-     *
-     * @param template  TemplateConfig
-     * @param outputDir
-     * @param config    PackageConfig
-     */
-    private void handlerPackage(TemplateConfig template, String outputDir, PackageConfig config) {
+    private void handlerPackage(TemplateConfig template, String outputDir, String interfaceOutputDir, String controllerOutputDir, PackageConfig config) {
         packageInfo = new HashMap<>(8);
         packageInfo.put(ConstVal.MODULENAME, config.getModuleName());
         packageInfo.put(ConstVal.ENTITY, joinPackage(config.getParent(), config.getEntity()));
@@ -254,7 +234,11 @@ public class ConfigBuilder {
         // 生成路径信息
         pathInfo = new HashMap<>(6);
         if (StringUtils.isNotEmpty(template.getEntity(getGlobalConfig().isKotlin()))) {
-            pathInfo.put(ConstVal.ENTITY_PATH, joinPath(outputDir, packageInfo.get(ConstVal.ENTITY)));
+            if(StringUtils.isNotEmpty(interfaceOutputDir)){
+                pathInfo.put(ConstVal.ENTITY_PATH, joinPath(interfaceOutputDir, packageInfo.get(ConstVal.ENTITY)));
+            }else{
+                pathInfo.put(ConstVal.ENTITY_PATH, joinPath(outputDir, packageInfo.get(ConstVal.ENTITY)));
+            }
         }
         if (StringUtils.isNotEmpty(template.getMapper())) {
             pathInfo.put(ConstVal.MAPPER_PATH, joinPath(outputDir, packageInfo.get(ConstVal.MAPPER)));
@@ -263,13 +247,21 @@ public class ConfigBuilder {
             pathInfo.put(ConstVal.XML_PATH, joinPath(outputDir, packageInfo.get(ConstVal.XML)));
         }
         if (StringUtils.isNotEmpty(template.getService())) {
-            pathInfo.put(ConstVal.SERVICE_PATH, joinPath(outputDir, packageInfo.get(ConstVal.SERVICE)));
+            if(StringUtils.isNotEmpty(interfaceOutputDir)){
+                pathInfo.put(ConstVal.SERVICE_PATH, joinPath(interfaceOutputDir, packageInfo.get(ConstVal.SERVICE)));
+            }else{
+                pathInfo.put(ConstVal.SERVICE_PATH, joinPath(outputDir, packageInfo.get(ConstVal.SERVICE)));
+            }
         }
         if (StringUtils.isNotEmpty(template.getServiceImpl())) {
             pathInfo.put(ConstVal.SERVICEIMPL_PATH, joinPath(outputDir, packageInfo.get(ConstVal.SERVICEIMPL)));
         }
         if (StringUtils.isNotEmpty(template.getController())) {
-            pathInfo.put(ConstVal.CONTROLLER_PATH, joinPath(outputDir, packageInfo.get(ConstVal.CONTROLLER)));
+            if(StringUtils.isNotEmpty(controllerOutputDir)){
+                pathInfo.put(ConstVal.CONTROLLER_PATH, joinPath(controllerOutputDir, packageInfo.get(ConstVal.CONTROLLER)));
+            }else{
+                pathInfo.put(ConstVal.CONTROLLER_PATH, joinPath(outputDir, packageInfo.get(ConstVal.CONTROLLER)));
+            }
         }
     }
 

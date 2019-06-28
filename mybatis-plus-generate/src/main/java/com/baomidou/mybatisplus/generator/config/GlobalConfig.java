@@ -30,7 +30,17 @@ public class GlobalConfig {
     /**
      * 生成文件的输出目录【默认 D 盘根目录】
      */
-    private String outputDir = "D://";
+    private String outputDir = "D://tmp//";
+
+    /**
+     * 接口层文件输出目录，以便微服务输出到不同的module
+     */
+    private String interfaceOutputDir = "";
+
+    /**
+     * 控制层输出目录，以便微服务输出到不同的module
+     */
+    private String controllerOutputDir = "";
 
     /**
      * 是否覆盖已有文件
@@ -216,6 +226,24 @@ public class GlobalConfig {
 
     public GlobalConfig setControllerName(String controllerName) {
         this.controllerName = controllerName;
+        return this;
+    }
+
+    public String getInterfaceOutputDir() {
+        return interfaceOutputDir;
+    }
+
+    public GlobalConfig setInterfaceOutputDir(String interfaceOutputDir) {
+        this.interfaceOutputDir = interfaceOutputDir;
+        return this;
+    }
+
+    public String getControllerOutputDir() {
+        return controllerOutputDir;
+    }
+
+    public GlobalConfig setControllerOutputDir(String controllerOutputDir) {
+        this.controllerOutputDir = controllerOutputDir;
         return this;
     }
 }
